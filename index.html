@@ -911,15 +911,15 @@
         <!-- Summary Display -->
         <div class="summary-card">
           <div class="summary-title">
-            <i class="fa-solid fa-sparkles"></i>
-            <span>التوقعات والخصوبة</span>
+            <i class="fa-solid fa-calendar-days" style="color: var(--primary-color);"></i>
+            <span>التوقعات وفترة الحيض</span>
           </div>
           <div class="summary-item">
             <span class="summary-label">تاريخ الدورة القادمة</span>
             <span id="nextPeriodVal" class="summary-value">--</span>
           </div>
           <div class="summary-item">
-            <span class="summary-label">فترة الخصوبة المتوقعة</span>
+            <span class="summary-label">فترة الحيض المتوقعة</span>
             <span id="fertilityWindowVal" class="summary-value">--</span>
           </div>
         </div>
@@ -1255,8 +1255,12 @@
       document.getElementById('nextPeriodVal').innerText = formatNumbers(nextPeriod.toLocaleDateString('ar-u-nu-latn', dateOptions));
       
       if (diffDays >= 0) {
-        const startStr = formatNumbers(fertileStart.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
-        const endStr = formatNumbers(fertileEnd.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
+        const periodStart = new Date(nextPeriod.getTime());
+        const periodEnd = new Date(nextPeriod.getTime());
+        periodEnd.setDate(periodEnd.getDate() + periodDur - 1);
+        
+        const startStr = formatNumbers(periodStart.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
+        const endStr = formatNumbers(periodEnd.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
         document.getElementById('fertilityWindowVal').innerText = `من ${startStr} إلى ${endStr}`;
       } else {
         document.getElementById('fertilityWindowVal').innerText = 'غير متوفر';
