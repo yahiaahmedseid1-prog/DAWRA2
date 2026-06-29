@@ -718,7 +718,7 @@
   <div class="app-container">
     
     <!-- 1. شاشة تسجيل الدخول (Default) -->
-    <div id="loginScreen" class="screen active">
+    <div id="loginScreen" class="screen">
       <div class="app-header">
         <div class="app-logo"><i class="fa-solid fa-heart-pulse"></i></div>
         <div class="app-title">تتبع الدورة</div>
@@ -751,9 +751,14 @@
             <span class="text-link" onclick="showScreen('registerScreen')">إنشاء حساب جديد</span>
           </div>
 
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" style="margin-bottom: 12px;">
             <span>تسجيل الدخول</span>
             <i class="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <button type="button" id="btnLocalMode" class="btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: none;">
+            <span>استخدام بدون اتصال (محلي)</span>
+            <i class="fa-solid fa-wifi-slash"></i>
           </button>
         </form>
       </div>
@@ -865,7 +870,7 @@
           </div>
           <div class="stat-card">
             <div class="stat-icon purple"><i class="fa-solid fa-hourglass-half"></i></div>
-            <div class="stat-label">الأيام المتبقية</div>
+            <div class="stat-label">الايام المتبقية للحيض</div>
             <div id="daysRemainingVal" class="stat-value">--</div>
           </div>
         </div>
@@ -984,7 +989,7 @@
   </div>
 
   <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="loader-overlay">
+  <div id="loadingOverlay" class="loader-overlay active">
     <div class="spinner"></div>
   </div>
 
@@ -1271,9 +1276,10 @@
     onAuthStateChanged(auth, async (user) => {
       setLoader(true);
       if (user) {
+        localStorage.removeItem('isLocalMode'); // If logged in, prefer online user data
         document.getElementById('userEmailDisplay').innerText = user.email;
         
-        // استدعاء البيانات من Firestore
+        // استدعاء البيانات من Firestore مع التخزين الاحتياطي محلياً للعمل بدون إنترنت
         try {
           const docRef = doc(db, "users_cycles", user.uid);
           const docSnap = await getDoc(docRef);
@@ -1285,6 +1291,9 @@
             document.getElementById('periodDuration').value = data.periodDuration || 5;
             
             updateCycleUI(data.lastPeriodDate, parseInt(data.cycleLength) || 28, parseInt(data.periodDuration) || 5);
+            
+            // حفظ نسخة احتياطية محلية
+            localStorage.setItem('cached_cycle_data_' + user.uid, JSON.stringify(data));
           } else {
             // استخدام قيم افتراضية جميلة إذا لم تتوفر بيانات سابقة
             const defaultDate = new Date();
@@ -1298,14 +1307,83 @@
             updateCycleUI(defaultDateStr, 28, 5);
           }
         } catch (error) {
-          console.error("خطأ أثناء جلب البيانات من Firestore:", error);
+          console.error("خطأ أثناء جلب البيانات من Firestore (قد تكون بدون اتصال بالإنترنت):", error);
+          // استرداد البيانات من الذاكرة المحلية الاحتياطية
+          const cached = localStorage.getItem('cached_cycle_data_' + user.uid);
+          if (cached) {
+            const data = JSON.parse(cached);
+            document.getElementById('lastPeriodDate').value = data.lastPeriodDate || "";
+            document.getElementById('cycleLength').value = data.cycleLength || 28;
+            document.getElementById('periodDuration').value = data.periodDuration || 5;
+            updateCycleUI(data.lastPeriodDate, parseInt(data.cycleLength) || 28, parseInt(data.periodDuration) || 5);
+          } else {
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() - 14);
+            const defaultDateStr = defaultDate.toISOString().split('T')[0];
+            document.getElementById('lastPeriodDate').value = defaultDateStr;
+            document.getElementById('cycleLength').value = 28;
+            document.getElementById('periodDuration').value = 5;
+            updateCycleUI(defaultDateStr, 28, 5);
+          }
         }
         
         showScreen('dashboardScreen');
       } else {
-        showScreen('loginScreen');
+        // إذا لم يكن مسجلاً الدخول، نتحقق مما إذا كان قد فعل "الوضع المحلي" للعمل بدون إنترنت
+        const isLocalMode = localStorage.getItem('isLocalMode') === 'true';
+        if (isLocalMode) {
+          document.getElementById('userEmailDisplay').innerText = 'مستخدم محلي (بدون إنترنت)';
+          const localDataStr = localStorage.getItem('local_cycle_data');
+          if (localDataStr) {
+            const data = JSON.parse(localDataStr);
+            document.getElementById('lastPeriodDate').value = data.lastPeriodDate || "";
+            document.getElementById('cycleLength').value = data.cycleLength || 28;
+            document.getElementById('periodDuration').value = data.periodDuration || 5;
+            updateCycleUI(data.lastPeriodDate, parseInt(data.cycleLength) || 28, parseInt(data.periodDuration) || 5);
+          } else {
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() - 14);
+            const defaultDateStr = defaultDate.toISOString().split('T')[0];
+            document.getElementById('lastPeriodDate').value = defaultDateStr;
+            document.getElementById('cycleLength').value = 28;
+            document.getElementById('periodDuration').value = 5;
+            updateCycleUI(defaultDateStr, 28, 5);
+          }
+          showScreen('dashboardScreen');
+        } else {
+          showScreen('loginScreen');
+        }
       }
       setLoader(false);
+    });
+
+    // زر الاستخدام بدون اتصال (المحلي)
+    document.getElementById('btnLocalMode').addEventListener('click', () => {
+      setLoader(true);
+      localStorage.setItem('isLocalMode', 'true');
+      document.getElementById('userEmailDisplay').innerText = 'مستخدم محلي (بدون إنترنت)';
+      
+      const localDataStr = localStorage.getItem('local_cycle_data');
+      if (localDataStr) {
+        const data = JSON.parse(localDataStr);
+        document.getElementById('lastPeriodDate').value = data.lastPeriodDate || "";
+        document.getElementById('cycleLength').value = data.cycleLength || 28;
+        document.getElementById('periodDuration').value = data.periodDuration || 5;
+        updateCycleUI(data.lastPeriodDate, parseInt(data.cycleLength) || 28, parseInt(data.periodDuration) || 5);
+      } else {
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() - 14);
+        const defaultDateStr = defaultDate.toISOString().split('T')[0];
+        document.getElementById('lastPeriodDate').value = defaultDateStr;
+        document.getElementById('cycleLength').value = 28;
+        document.getElementById('periodDuration').value = 5;
+        updateCycleUI(defaultDateStr, 28, 5);
+      }
+      
+      setTimeout(() => {
+        showScreen('dashboardScreen');
+        setLoader(false);
+      }, 300);
     });
 
     // 1. تسجيل الدخول
@@ -1316,6 +1394,7 @@
       
       setLoader(true);
       try {
+        localStorage.removeItem('isLocalMode'); // Reset local mode upon login
         await signInWithEmailAndPassword(auth, email, password);
       } catch (error) {
         showAlert('loginAlert', translateError(error.code));
@@ -1332,6 +1411,7 @@
 
       setLoader(true);
       try {
+        localStorage.removeItem('isLocalMode'); // Reset local mode upon registration
         await createUserWithEmailAndPassword(auth, email, password);
       } catch (error) {
         showAlert('registerAlert', translateError(error.code));
@@ -1356,30 +1436,52 @@
       }
     });
 
-    // 4. تسجيل الخروج
+    // 4. تسجيل الخروج (أو الخروج من الوضع المحلي)
     document.getElementById('btnSignOut').addEventListener('click', async () => {
       setLoader(true);
+      localStorage.removeItem('isLocalMode');
       try {
         await signOut(auth);
       } catch (error) {
         console.error("خطأ في تسجيل الخروج:", error);
-      } finally {
-        setLoader(false);
       }
+      showScreen('loginScreen');
+      setLoader(false);
     });
 
     // 5. حفظ وتحديث بيانات الدورة الشهرية
     document.getElementById('cycleSettingsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return;
-
+      
       const lastPeriodDate = document.getElementById('lastPeriodDate').value;
       const cycleLength = parseInt(document.getElementById('cycleLength').value);
       const periodDuration = parseInt(document.getElementById('periodDuration').value);
 
       if (!lastPeriodDate) {
         showAlert('dashboardAlert', 'يرجى ملء تاريخ آخر دورة بشكل صحيح.');
+        return;
+      }
+
+      const isLocalMode = localStorage.getItem('isLocalMode') === 'true';
+      const user = auth.currentUser;
+
+      if (isLocalMode || !user) {
+        // حفظ محلي تماماً للعمل بدون إنترنت
+        const localData = {
+          lastPeriodDate,
+          cycleLength,
+          periodDuration,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('local_cycle_data', JSON.stringify(localData));
+        localStorage.setItem('isLocalMode', 'true');
+        
+        updateCycleUI(lastPeriodDate, cycleLength, periodDuration);
+        showAlert('dashboardAlert', 'تم حفظ وتحديث الإعدادات محلياً بنجاح!', true);
+        
+        setTimeout(() => {
+          document.getElementById('dashboardAlert').style.display = 'none';
+        }, 4000);
         return;
       }
 
@@ -1393,12 +1495,28 @@
           updatedAt: new Date().toISOString()
         });
 
+        // حفظ نسخة احتياطية محلية للعمل بدون إنترنت لاحقاً
+        localStorage.setItem('cached_cycle_data_' + user.uid, JSON.stringify({
+          lastPeriodDate,
+          cycleLength,
+          periodDuration
+        }));
+
         // تحديث الواجهة
         updateCycleUI(lastPeriodDate, cycleLength, periodDuration);
         showAlert('dashboardAlert', 'تم حفظ وتحديث إعدادات دورتكِ بنجاح!', true);
       } catch (error) {
-        showAlert('dashboardAlert', 'حدث خطأ أثناء حفظ البيانات، يرجى المحاولة لاحقاً.');
-        console.error("خطأ Firestore:", error);
+        console.error("خطأ Firestore (تم الحفظ محلياً):", error);
+        
+        // حفظ محلي كنسخة احتياطية في حال تعذر الاتصال بـ Firestore
+        localStorage.setItem('cached_cycle_data_' + user.uid, JSON.stringify({
+          lastPeriodDate,
+          cycleLength,
+          periodDuration
+        }));
+        
+        updateCycleUI(lastPeriodDate, cycleLength, periodDuration);
+        showAlert('dashboardAlert', 'تم حفظ الإعدادات محلياً (تعذر الاتصال بالخادم)', true);
       } finally {
         setLoader(false);
         // إخفاء التنبيه تلقائياً بعد 4 ثوانٍ
