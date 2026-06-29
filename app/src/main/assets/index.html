@@ -266,12 +266,22 @@
       display: block;
     }
 
-    /* Dashboard Header */
+    /* Dashboard Header (Sticky Glass Top Bar) */
     .dash-header {
+      position: sticky;
+      top: -1px;
+      z-index: 1000;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(244, 114, 182, 0.04);
     }
 
     .user-info {
@@ -465,18 +475,19 @@
     }
 
     .progress-day-number {
-      font-size: 2.2rem; /* Reduced from 3.5rem */
+      font-size: 2.8rem;
       font-weight: 900;
       color: var(--primary-color);
       line-height: 1;
-      letter-spacing: -1px;
+      margin: 2px 0;
+      text-shadow: 0 2px 10px rgba(244, 114, 182, 0.15);
     }
 
     .progress-day-label {
-      font-size: 0.65rem; /* Reduced from 0.75rem */
+      font-size: 0.75rem;
       color: var(--text-muted);
       margin-bottom: 2px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -889,8 +900,8 @@
                   cy="80" />
               </svg>
               <div class="progress-text">
-                <div class="progress-day-label">التقدم الحالي</div>
-                <div id="progressMainText" class="progress-day-number">اليوم --</div>
+                <div class="progress-day-label">يوم الدورة</div>
+                <div id="progressMainText" class="progress-day-number">--</div>
                 <div id="progressStatusBadge" class="progress-status-badge">...</div>
               </div>
             </div>
@@ -1204,12 +1215,38 @@
       // تحديث عناصر واجهة المستخدم مع تحويل الأرقام إلى اللاتينية 0123456789
       document.getElementById('currentDayVal').innerText = formatNumbers(`اليوم ${currentDay}`);
       document.getElementById('daysRemainingVal').innerText = formatNumbers(`${daysRemaining} يوم`);
-      document.getElementById('progressMainText').innerText = formatNumbers(`اليوم ${currentDay}`);
+      
+      if (diffDays >= 0) {
+        document.getElementById('progressMainText').innerText = formatNumbers(`${currentDay}`);
+      } else {
+        document.getElementById('progressMainText').innerText = '--';
+      }
       
       const badge = document.getElementById('progressStatusBadge');
       badge.innerText = status;
-      badge.style.color = statusColor;
-      badge.style.border = `1px solid ${statusColor}`;
+      
+      let badgeBg, badgeTextColor, badgeBorderColor;
+      if (diffDays < 0) {
+        badgeBg = 'rgba(167, 139, 250, 0.12)';
+        badgeTextColor = 'var(--secondary-color)';
+        badgeBorderColor = 'rgba(167, 139, 250, 0.25)';
+      } else if (currentDay <= periodDur) {
+        badgeBg = 'rgba(244, 63, 94, 0.12)';
+        badgeTextColor = 'var(--accent-red)';
+        badgeBorderColor = 'rgba(244, 63, 94, 0.25)';
+      } else if (currentDay >= 10 && currentDay <= 17) {
+        badgeBg = 'rgba(16, 185, 129, 0.12)';
+        badgeTextColor = 'var(--accent-green)';
+        badgeBorderColor = 'rgba(16, 185, 129, 0.25)';
+      } else {
+        badgeBg = 'rgba(59, 130, 246, 0.12)';
+        badgeTextColor = 'var(--accent-blue)';
+        badgeBorderColor = 'rgba(59, 130, 246, 0.25)';
+      }
+      
+      badge.style.backgroundColor = badgeBg;
+      badge.style.color = badgeTextColor;
+      badge.style.borderColor = badgeBorderColor;
 
       setProgress(progressPercent);
 
