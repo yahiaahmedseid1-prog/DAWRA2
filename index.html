@@ -606,6 +606,118 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Tabs Content Display */
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Fixed Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 440px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 24px;
+      padding: 10px 8px;
+      display: none; /* Only visible when dashboard is active */
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(244, 114, 182, 0.15);
+      z-index: 999;
+      transition: all 0.3s ease;
+    }
+
+    .bottom-nav.visible {
+      display: flex;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 8px 16px;
+      border-radius: 16px;
+      text-decoration: none;
+      outline: none;
+    }
+
+    .nav-item i {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-item.active {
+      color: var(--primary-color);
+      background: rgba(244, 114, 182, 0.1);
+    }
+
+    .nav-item.active i {
+      transform: scale(1.15) translateY(-2px);
+    }
+
+    /* Dashboard screen bottom spacing */
+    #dashboardScreen {
+      padding-bottom: 90px;
+    }
+
+    /* Enhanced Circular Progress Ring */
+    .progress-ring__circle {
+      stroke: url(#progressGradient);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.6));
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: calc(100% - 44px);
+      height: calc(100% - 44px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 10px 30px rgba(244, 114, 182, 0.12), inset 0 2px 4px rgba(255,255,255,0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      animation: pulseGlow 4s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 10px 30px rgba(244, 114, 182, 0.12), inset 0 2px 4px rgba(255,255,255,0.8);
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        box-shadow: 0 10px 35px rgba(244, 114, 182, 0.22), inset 0 2px 4px rgba(255,255,255,0.8);
+        transform: translate(-50%, -50%) scale(1.02);
+      }
+    }
   </style>
 </head>
 <body>
@@ -749,115 +861,133 @@
         </button>
       </div>
 
-      <!-- Quick Stats Card Grid -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon pink"><i class="fa-solid fa-calendar-day"></i></div>
-          <div class="stat-label">اليوم الحالي</div>
-          <div id="currentDayVal" class="stat-value">--</div>
+      <!-- Tab 1: الرئيسية -->
+      <div id="tabHome" class="tab-content active">
+        <!-- Quick Stats Card Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon pink"><i class="fa-solid fa-calendar-day"></i></div>
+            <div class="stat-label">اليوم الحالي</div>
+            <div id="currentDayVal" class="stat-value">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="stat-label">الأيام المتبقية</div>
+            <div id="daysRemainingVal" class="stat-value">--</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon purple"><i class="fa-solid fa-hourglass-half"></i></div>
-          <div class="stat-label">الأيام المتبقية</div>
-          <div id="daysRemainingVal" class="stat-value">--</div>
-        </div>
-      </div>
 
-      <!-- Ring Progress Display -->
-      <div class="card" style="text-align: center;">
-        <div class="cycle-progress-container">
-          <div class="progress-ring-wrapper">
-            <svg class="progress-ring" width="220" height="220">
-              <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f472b6" />
-                  <stop offset="100%" stop-color="#a78bfa" />
-                </linearGradient>
-              </defs>
-              <!-- Background Circle -->
-              <circle
-                class="progress-ring__circle-bg"
-                stroke-width="12"
-                fill="transparent"
-                r="95"
-                cx="110"
-                cy="110" />
-              <!-- Animated Ring -->
-              <circle
-                id="progressRingCircle"
-                class="progress-ring__circle"
-                stroke-width="12"
-                fill="transparent"
-                r="95"
-                cx="110"
-                cy="110" />
-            </svg>
-            <div class="progress-text">
-              <div class="progress-day-label">التقدم الحالي</div>
-              <div id="progressMainText" class="progress-day-number">اليوم --</div>
-              <div id="progressStatusBadge" class="progress-status-badge">...</div>
+        <!-- Ring Progress Display -->
+        <div class="card" style="text-align: center;">
+          <div class="cycle-progress-container">
+            <div class="progress-ring-wrapper">
+              <svg class="progress-ring" width="220" height="220">
+                <defs>
+                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f472b6" />
+                    <stop offset="100%" stop-color="#a78bfa" />
+                  </linearGradient>
+                </defs>
+                <!-- Background Circle -->
+                <circle
+                  class="progress-ring__circle-bg"
+                  stroke-width="12"
+                  fill="transparent"
+                  r="95"
+                  cx="110"
+                  cy="110" />
+                <!-- Animated Ring -->
+                <circle
+                  id="progressRingCircle"
+                  class="progress-ring__circle"
+                  stroke-width="12"
+                  fill="transparent"
+                  r="95"
+                  cx="110"
+                  cy="110" />
+              </svg>
+              <div class="progress-text">
+                <div class="progress-day-label">التقدم الحالي</div>
+                <div id="progressMainText" class="progress-day-number">اليوم --</div>
+                <div id="progressStatusBadge" class="progress-status-badge">...</div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Summary Display -->
+        <div class="summary-card">
+          <div class="summary-title">
+            <i class="fa-solid fa-sparkles"></i>
+            <span>التوقعات والخصوبة</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">تاريخ الدورة القادمة</span>
+            <span id="nextPeriodVal" class="summary-value">--</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">فترة الخصوبة المتوقعة</span>
+            <span id="fertilityWindowVal" class="summary-value">--</span>
           </div>
         </div>
       </div>
 
-      <!-- Summary Display -->
-      <div class="summary-card">
-        <div class="summary-title">
-          <i class="fa-solid fa-sparkles"></i>
-          <span>التوقعات والخصوبة</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">تاريخ الدورة القادمة</span>
-          <span id="nextPeriodVal" class="summary-value">--</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">فترة الخصوبة المتوقعة</span>
-          <span id="fertilityWindowVal" class="summary-value">--</span>
-        </div>
-      </div>
-
-      <!-- Settings / Inputs Form Card (Bottom Sheet Look) -->
-      <div class="card settings-bottom-sheet">
-        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 16px;">
-          <i class="fa-solid fa-sliders" style="color: var(--primary-color); margin-left: 8px;"></i>إعدادات الدورة الشهرية
-        </div>
-        <div id="dashboardAlert" class="alert"></div>
-
-        <form id="cycleSettingsForm">
-          <div class="form-group">
-            <label class="form-label">تاريخ آخر دورة شهرية</label>
-            <div class="input-wrapper">
-              <span class="input-icon"><i class="fa-regular fa-calendar-plus"></i></span>
-              <input type="date" id="lastPeriodDate" class="form-input" required>
-            </div>
+      <!-- Tab 2: الإعدادات -->
+      <div id="tabSettings" class="tab-content">
+        <!-- Settings / Inputs Form Card (Bottom Sheet Look) -->
+        <div class="card settings-bottom-sheet">
+          <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 16px;">
+            <i class="fa-solid fa-sliders" style="color: var(--primary-color); margin-left: 8px;"></i>إعدادات الدورة الشهرية
           </div>
+          <div id="dashboardAlert" class="alert"></div>
 
-          <div class="form-group">
-            <label class="form-label">متوسط مدة الدورة (أيام)</label>
-            <div class="input-wrapper">
-              <span class="input-icon"><i class="fa-solid fa-arrows-left-right"></i></span>
-              <input type="number" id="cycleLength" class="form-input" min="15" max="45" value="28" required>
+          <form id="cycleSettingsForm">
+            <div class="form-group">
+              <label class="form-label">تاريخ آخر دورة شهرية</label>
+              <div class="input-wrapper">
+                <span class="input-icon"><i class="fa-regular fa-calendar-plus"></i></span>
+                <input type="date" id="lastPeriodDate" class="form-input" required>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">مدة الحيض (أيام)</label>
-            <div class="input-wrapper">
-              <span class="input-icon"><i class="fa-solid fa-droplet"></i></span>
-              <input type="number" id="periodDuration" class="form-input" min="2" max="15" value="5" required>
+            <div class="form-group">
+              <label class="form-label">متوسط مدة الدورة (أيام)</label>
+              <div class="input-wrapper">
+                <span class="input-icon"><i class="fa-solid fa-arrows-left-right"></i></span>
+                <input type="number" id="cycleLength" class="form-input" min="15" max="45" value="28" required>
+              </div>
             </div>
-          </div>
 
-          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
-            <span>حفظ وتحديث البيانات</span>
-            <i class="fa-solid fa-floppy-disk"></i>
-          </button>
-        </form>
+            <div class="form-group">
+              <label class="form-label">مدة الحيض (أيام)</label>
+              <div class="input-wrapper">
+                <span class="input-icon"><i class="fa-solid fa-droplet"></i></span>
+                <input type="number" id="periodDuration" class="form-input" min="2" max="15" value="5" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+              <span>حفظ وتحديث البيانات</span>
+              <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+          </form>
+        </div>
       </div>
 
     </div>
 
+  </div>
+
+  <!-- شريط التنقل السفلي -->
+  <div id="bottomNav" class="bottom-nav">
+    <button id="navHomeBtn" class="nav-item active" onclick="switchTab('tabHome')">
+      <i class="fa-solid fa-heart-pulse"></i>
+      <span>الرئيسية</span>
+    </button>
+    <button id="navSettingsBtn" class="nav-item" onclick="switchTab('tabSettings')">
+      <i class="fa-solid fa-sliders"></i>
+      <span>الإعدادات</span>
+    </button>
   </div>
 
   <!-- Loading Overlay -->
@@ -919,6 +1049,39 @@
       progressRingCircle.style.strokeDashoffset = offset;
     }
 
+    // دالة لتحويل أرقام اللغة العربية الشرقية إلى أرقام لاتينية قياسية 0123456789
+    function formatNumbers(str) {
+      if (str === null || str === undefined) return '';
+      str = String(str);
+      const easternDigits = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+      for (let i = 0; i < 10; i++) {
+        str = str.replace(easternDigits[i], i);
+      }
+      return str;
+    }
+
+    // التبديل بين التبويبات في لوحة التحكم
+    window.switchTab = function(tabId) {
+      // إخفاء كافة التبويبات
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // إلغاء تفعيل أزرار القائمة
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // تفعيل التبويب المختار
+      document.getElementById(tabId).classList.add('active');
+
+      // تفعيل زر القائمة المقابل
+      if (tabId === 'tabHome') {
+        document.getElementById('navHomeBtn').classList.add('active');
+      } else if (tabId === 'tabSettings') {
+        document.getElementById('navSettingsBtn').classList.add('active');
+      }
+    }
+
     // التنقل بين الشاشات
     window.showScreen = function(screenId) {
       // إخفاء جميع التنبيهات عند تبديل الشاشات
@@ -932,6 +1095,16 @@
           screen.classList.remove('active');
         }
       });
+
+      // إظهار أو إخفاء شريط التنقل السفلي
+      const bottomNav = document.getElementById('bottomNav');
+      if (screenId === 'dashboardScreen') {
+        bottomNav.classList.add('visible');
+        // افتراضياً نذهب لتبويب الرئيسية
+        switchTab('tabHome');
+      } else {
+        bottomNav.classList.remove('visible');
+      }
     }
 
     // إظهار/إخفاء مؤشر التحميل
@@ -1046,10 +1219,10 @@
         currentDay = 1;
       }
 
-      // تحديث عناصر واجهة المستخدم
-      document.getElementById('currentDayVal').innerText = `اليوم ${currentDay}`;
-      document.getElementById('daysRemainingVal').innerText = `${daysRemaining} يوم`;
-      document.getElementById('progressMainText').innerText = `اليوم ${currentDay}`;
+      // تحديث عناصر واجهة المستخدم مع تحويل الأرقام إلى اللاتينية 0123456789
+      document.getElementById('currentDayVal').innerText = formatNumbers(`اليوم ${currentDay}`);
+      document.getElementById('daysRemainingVal').innerText = formatNumbers(`${daysRemaining} يوم`);
+      document.getElementById('progressMainText').innerText = formatNumbers(`اليوم ${currentDay}`);
       
       const badge = document.getElementById('progressStatusBadge');
       badge.innerText = status;
@@ -1058,13 +1231,13 @@
 
       setProgress(progressPercent);
 
-      // تنسيق التواريخ للعربية الجميلة
+      // تنسيق التواريخ للعربية الجميلة بالارقام اللاتينية
       const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('nextPeriodVal').innerText = nextPeriod.toLocaleDateString('ar-EG', dateOptions);
+      document.getElementById('nextPeriodVal').innerText = formatNumbers(nextPeriod.toLocaleDateString('ar-u-nu-latn', dateOptions));
       
       if (diffDays >= 0) {
-        const startStr = fertileStart.toLocaleDateString('ar-EG', { month: 'long', day: 'numeric' });
-        const endStr = fertileEnd.toLocaleDateString('ar-EG', { month: 'long', day: 'numeric' });
+        const startStr = formatNumbers(fertileStart.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
+        const endStr = formatNumbers(fertileEnd.toLocaleDateString('ar-u-nu-latn', { month: 'long', day: 'numeric' }));
         document.getElementById('fertilityWindowVal').innerText = `من ${startStr} إلى ${endStr}`;
       } else {
         document.getElementById('fertilityWindowVal').innerText = 'غير متوفر';
