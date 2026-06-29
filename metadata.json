@@ -1,0 +1,6 @@
+{
+  "name": "تتبع الدورة",
+  "description": "تطبيق متكامل لتتبع الدورة الشهرية والتنبؤ بها وحساب أيام الخصوبة وحفظ البيانات مع Firebase",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

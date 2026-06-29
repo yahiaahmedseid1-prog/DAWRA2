@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>تتبع الدورة الشهرية</title>
+  
+  <!-- Google Fonts: Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #f472b6;
+      --primary-hover: #ec4899;
+      --secondary-color: #a78bfa;
+      --secondary-hover: #8b5cf6;
+      --bg-gradient: linear-gradient(135deg, #FFF5F7 0%, #FDF2F8 50%, #F5F3FF 100%);
+      --text-color: #4a344a;
+      --text-muted: #7c5c7c;
+      --glass-bg: rgba(255, 255, 255, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --card-shadow: 0 10px 40px 0 rgba(244, 114, 182, 0.1);
+      --accent-red: #f43f5e;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Container holding all screens */
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Generic Card Style */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      width: 100%;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 20px;
+    }
+
+    /* Title & Headers */
+    .app-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .app-logo {
+      font-size: 3rem;
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      display: inline-block;
+      filter: drop-shadow(0 4px 6px rgba(244, 114, 182, 0.15));
+    }
+
+    .app-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-color);
+      letter-spacing: -0.5px;
+    }
+
+    .app-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-color);
+      padding-right: 4px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 44px 14px 16px;
+      border: 2px solid transparent;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text-color);
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.15);
+    }
+
+    /* Form actions and secondary links */
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+
+    .text-link {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .text-link:hover {
+      color: var(--secondary-hover);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(244, 114, 182, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-hover), var(--secondary-hover));
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(244, 114, 182, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--glass-border);
+      color: var(--text-color);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert-error {
+      background-color: rgba(254, 226, 226, 0.6);
+      color: var(--accent-red);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .alert-success {
+      background-color: rgba(209, 250, 229, 0.6);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Main Screens Management */
+    .screen {
+      display: none;
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* Dashboard Header */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-color);
+      font-size: 1.3rem;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(244, 114, 182, 0.1);
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-welcome {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .user-email {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #4a344a;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-logout {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-logout:hover {
+      background: var(--accent-red);
+      color: white;
+      transform: scale(1.05);
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+    }
+
+    /* Grid for quick stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      padding: 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.5);
+      border-color: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 30px rgba(244, 114, 182, 0.08);
+    }
+
+    .stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-icon.pink {
+      background: rgba(244, 114, 182, 0.15);
+      color: var(--primary-color);
+    }
+    .stat-icon.purple {
+      background: rgba(167, 139, 250, 0.15);
+      color: var(--secondary-color);
+    }
+    .stat-icon.green {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+
+    /* Visual Cycle Ring */
+    .cycle-progress-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin: 16px 0;
+    }
+
+    .progress-ring-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    .progress-ring__circle-bg {
+      stroke: rgba(255, 255, 255, 0.5);
+    }
+
+    .progress-ring__circle {
+      stroke: url(#progressGradient);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease-out;
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: calc(100% - 44px);
+      height: calc(100% - 44px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 30px rgba(244, 114, 182, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .progress-day-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--primary-color);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .progress-day-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-status-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      box-shadow: 0 2px 8px rgba(244, 114, 182, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    /* Summary display */
+    .summary-card {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(244, 114, 182, 0.04);
+    }
+
+    .summary-title {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-color);
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .summary-value {
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    /* Settings Bottom Sheet look */
+    .settings-bottom-sheet {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 32px;
+      padding: 26px;
+      box-shadow: 0 15px 45px rgba(244, 114, 182, 0.1);
+      margin-top: 10px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Back buttons */
+    .back-bar {
+      margin-bottom: 16px;
+    }
+    
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Custom scrollbar and loading spinner */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .loader-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 5px solid rgba(244, 114, 182, 0.2);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- 1. شاشة تسجيل الدخول (Default) -->
+    <div id="loginScreen" class="screen active">
+      <div class="app-header">
+        <div class="app-logo"><i class="fa-solid fa-heart-pulse"></i></div>
+        <div class="app-title">تتبع الدورة</div>
+        <div class="app-subtitle">رفيقكِ الصحي الذكي لحياة أكثر تناغماً</div>
+      </div>
+
+      <div class="card">
+        <!-- Alert Box -->
+        <div id="loginAlert" class="alert alert-error"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-regular fa-envelope"></i></span>
+              <input type="email" id="loginEmail" class="form-input" placeholder="name@example.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+              <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <span class="text-link" onclick="showScreen('resetScreen')">نسيتِ كلمة المرور؟</span>
+            <span class="text-link" onclick="showScreen('registerScreen')">إنشاء حساب جديد</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <span>تسجيل الدخول</span>
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. شاشة إنشاء حساب جديد -->
+    <div id="registerScreen" class="screen">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showScreen('loginScreen')">
+          <i class="fa-solid fa-arrow-right"></i>
+          <span>العودة لتسجيل الدخول</span>
+        </button>
+      </div>
+
+      <div class="app-header">
+        <div class="app-logo"><i class="fa-solid fa-user-plus"></i></div>
+        <div class="app-title">إنشاء حساب</div>
+        <div class="app-subtitle">انضمي إلينا اليوم لتتبع دورتكِ بسهولة</div>
+      </div>
+
+      <div class="card">
+        <div id="registerAlert" class="alert alert-error"></div>
+
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-regular fa-envelope"></i></span>
+              <input type="email" id="registerEmail" class="form-input" placeholder="name@example.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+              <input type="password" id="registerPassword" class="form-input" placeholder="كلمة المرور (6 أحرف على الأقل)" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <span>تأكيد وإنشاء الحساب</span>
+            <i class="fa-solid fa-check"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. شاشة استعادة كلمة المرور -->
+    <div id="resetScreen" class="screen">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showScreen('loginScreen')">
+          <i class="fa-solid fa-arrow-right"></i>
+          <span>العودة لتسجيل الدخول</span>
+        </button>
+      </div>
+
+      <div class="app-header">
+        <div class="app-logo"><i class="fa-solid fa-key"></i></div>
+        <div class="app-title">استعادة كلمة المرور</div>
+        <div class="app-subtitle">أدخلي بريدكِ وسنرسل لكِ رابط إعادة التعيين</div>
+      </div>
+
+      <div class="card">
+        <div id="resetAlert" class="alert alert-error"></div>
+
+        <form id="resetForm">
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-regular fa-envelope"></i></span>
+              <input type="email" id="resetEmail" class="form-input" placeholder="name@example.com" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            <span>إرسال رابط استعادة المرور</span>
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. شاشة لوحة التحكم الرئيسية -->
+    <div id="dashboardScreen" class="screen">
+      <div class="dash-header">
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fa-solid fa-venus"></i>
+          </div>
+          <div class="user-details">
+            <span class="user-welcome">مرحباً بكِ</span>
+            <span id="userEmailDisplay" class="user-email">...</span>
+          </div>
+        </div>
+        <button id="btnSignOut" class="btn-logout" title="تسجيل الخروج">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+
+      <!-- Quick Stats Card Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon pink"><i class="fa-solid fa-calendar-day"></i></div>
+          <div class="stat-label">اليوم الحالي</div>
+          <div id="currentDayVal" class="stat-value">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fa-solid fa-hourglass-half"></i></div>
+          <div class="stat-label">الأيام المتبقية</div>
+          <div id="daysRemainingVal" class="stat-value">--</div>
+        </div>
+      </div>
+
+      <!-- Ring Progress Display -->
+      <div class="card" style="text-align: center;">
+        <div class="cycle-progress-container">
+          <div class="progress-ring-wrapper">
+            <svg class="progress-ring" width="220" height="220">
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f472b6" />
+                  <stop offset="100%" stop-color="#a78bfa" />
+                </linearGradient>
+              </defs>
+              <!-- Background Circle -->
+              <circle
+                class="progress-ring__circle-bg"
+                stroke-width="12"
+                fill="transparent"
+                r="95"
+                cx="110"
+                cy="110" />
+              <!-- Animated Ring -->
+              <circle
+                id="progressRingCircle"
+                class="progress-ring__circle"
+                stroke-width="12"
+                fill="transparent"
+                r="95"
+                cx="110"
+                cy="110" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-day-label">التقدم الحالي</div>
+              <div id="progressMainText" class="progress-day-number">اليوم --</div>
+              <div id="progressStatusBadge" class="progress-status-badge">...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Display -->
+      <div class="summary-card">
+        <div class="summary-title">
+          <i class="fa-solid fa-sparkles"></i>
+          <span>التوقعات والخصوبة</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">تاريخ الدورة القادمة</span>
+          <span id="nextPeriodVal" class="summary-value">--</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">فترة الخصوبة المتوقعة</span>
+          <span id="fertilityWindowVal" class="summary-value">--</span>
+        </div>
+      </div>
+
+      <!-- Settings / Inputs Form Card (Bottom Sheet Look) -->
+      <div class="card settings-bottom-sheet">
+        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 16px;">
+          <i class="fa-solid fa-sliders" style="color: var(--primary-color); margin-left: 8px;"></i>إعدادات الدورة الشهرية
+        </div>
+        <div id="dashboardAlert" class="alert"></div>
+
+        <form id="cycleSettingsForm">
+          <div class="form-group">
+            <label class="form-label">تاريخ آخر دورة شهرية</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-regular fa-calendar-plus"></i></span>
+              <input type="date" id="lastPeriodDate" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">متوسط مدة الدورة (أيام)</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-arrows-left-right"></i></span>
+              <input type="number" id="cycleLength" class="form-input" min="15" max="45" value="28" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">مدة الحيض (أيام)</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><i class="fa-solid fa-droplet"></i></span>
+              <input type="number" id="periodDuration" class="form-input" min="2" max="15" value="5" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">
+            <span>حفظ وتحديث البيانات</span>
+            <i class="fa-solid fa-floppy-disk"></i>
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loader-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Firebase JavaScript Modular SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword, 
+      sendPasswordResetEmail, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc, 
+      getDoc 
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // إعدادات Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDX8_3u_fXrorsE5yQ8WW2sHYycvDdHVws",
+      authDomain: "dawra-ebf14.firebaseapp.com",
+      projectId: "dawra-ebf14",
+      storageBucket: "dawra-ebf14.firebasestorage.app",
+      messagingSenderId: "188778205475",
+      appId: "1:188778205475:web:00f229bb45f20b27353c96",
+      measurementId: "G-N6DDVDC1E5"
+    };
+
+    // تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // العناصر الحية في الصفحة
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loginScreen = document.getElementById('loginScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const resetScreen = document.getElementById('resetScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+
+    const progressRingCircle = document.getElementById('progressRingCircle');
+    const radius = progressRingCircle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+
+    // ضبط المحيط للرسم البياني الدائري
+    progressRingCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+    progressRingCircle.style.strokeDashoffset = circumference;
+
+    function setProgress(percent) {
+      const offset = circumference - (percent / 100 * circumference);
+      progressRingCircle.style.strokeDashoffset = offset;
+    }
+
+    // التنقل بين الشاشات
+    window.showScreen = function(screenId) {
+      // إخفاء جميع التنبيهات عند تبديل الشاشات
+      document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
+      
+      const screens = [loginScreen, registerScreen, resetScreen, dashboardScreen];
+      screens.forEach(screen => {
+        if (screen.id === screenId) {
+          screen.classList.add('active');
+        } else {
+          screen.classList.remove('active');
+        }
+      });
+    }
+
+    // إظهار/إخفاء مؤشر التحميل
+    function setLoader(show) {
+      if (show) {
+        loadingOverlay.classList.add('active');
+      } else {
+        loadingOverlay.classList.remove('active');
+      }
+    }
+
+    // عرض التنبيهات
+    function showAlert(alertId, message, isSuccess = false) {
+      const alertEl = document.getElementById(alertId);
+      if (!alertEl) return;
+      
+      alertEl.innerText = message;
+      alertEl.style.display = 'flex';
+      
+      if (isSuccess) {
+        alertEl.classList.remove('alert-error');
+        alertEl.classList.add('alert-success');
+      } else {
+        alertEl.classList.remove('alert-success');
+        alertEl.classList.add('alert-error');
+      }
+    }
+
+    // ترجمة الأخطاء البرمجية إلى لغة عربية مفهومة
+    function translateError(code) {
+      switch(code) {
+        case 'auth/invalid-email':
+          return 'البريد الإلكتروني المكتوب غير صالح.';
+        case 'auth/user-disabled':
+          return 'تم تعطيل حساب المستخدم هذا.';
+        case 'auth/user-not-found':
+          return 'المستخدم غير مسجل بالخدمة. تأكدي من البريد الإلكتروني.';
+        case 'auth/wrong-password':
+          return 'كلمة المرور غير صحيحة.';
+        case 'auth/email-already-in-use':
+          return 'هذا البريد الإلكتروني مستخدم بالفعل بحساب آخر.';
+        case 'auth/weak-password':
+          return 'كلمة المرور ضعيفة جداً، يرجى إدخال 6 أحرف على الأقل.';
+        case 'auth/missing-password':
+          return 'الرجاء إدخال كلمة المرور.';
+        case 'auth/invalid-credential':
+          return 'البيانات المدخلة غير صحيحة، يرجى التحقق وإعادة المحاولة.';
+        default:
+          return 'حدث خطأ غير متوقع، يرجى المحاولة لاحقاً.';
+      }
+    }
+
+    // دالة تهيئة القيم والتنبؤات وحساب التقدم
+    function updateCycleUI(lastPeriodStr, cycleLen, periodDur) {
+      if (!lastPeriodStr) return;
+
+      const lastPeriod = new Date(lastPeriodStr);
+      lastPeriod.setHours(0,0,0,0);
+      
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      
+      const diffTime = today - lastPeriod;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      let currentDay = 1;
+      let daysRemaining = cycleLen;
+      let status = 'فترة عادية';
+      let statusClass = 'normal';
+      let statusColor = 'var(--text-color)';
+      let progressPercent = 0;
+      let nextPeriod = new Date();
+      let fertileStart = new Date();
+      let fertileEnd = new Date();
+
+      if (diffDays >= 0) {
+        currentDay = (diffDays % cycleLen) + 1;
+        daysRemaining = cycleLen - currentDay + 1;
+
+        // الحصول على بداية الدورة الحالية
+        const currentCycleStart = new Date(lastPeriod.getTime());
+        currentCycleStart.setDate(currentCycleStart.getDate() + Math.floor(diffDays / cycleLen) * cycleLen);
+
+        nextPeriod = new Date(currentCycleStart.getTime());
+        nextPeriod.setDate(nextPeriod.getDate() + cycleLen);
+
+        fertileStart = new Date(currentCycleStart.getTime());
+        fertileStart.setDate(fertileStart.getDate() + 9); // اليوم العاشر
+
+        fertileEnd = new Date(currentCycleStart.getTime());
+        fertileEnd.setDate(fertileEnd.getDate() + 16); // اليوم السابع عشر
+
+        progressPercent = (currentDay / cycleLen) * 100;
+
+        if (currentDay <= periodDur) {
+          status = 'فترة الحيض';
+          statusColor = 'var(--accent-red)';
+        } else if (currentDay >= 10 && currentDay <= 17) {
+          status = 'فترة خصوبة عالية';
+          statusColor = 'var(--accent-green)';
+        } else {
+          status = 'فترة عادية (خصوبة منخفضة)';
+          statusColor = 'var(--accent-blue)';
+        }
+      } else {
+        // إذا كان التاريخ في المستقبل
+        daysRemaining = Math.abs(diffDays);
+        nextPeriod = lastPeriod;
+        status = 'تاريخ الدورة في المستقبل';
+        statusColor = 'var(--accent-blue)';
+        progressPercent = 0;
+        currentDay = 1;
+      }
+
+      // تحديث عناصر واجهة المستخدم
+      document.getElementById('currentDayVal').innerText = `اليوم ${currentDay}`;
+      document.getElementById('daysRemainingVal').innerText = `${daysRemaining} يوم`;
+      document.getElementById('progressMainText').innerText = `اليوم ${currentDay}`;
+      
+      const badge = document.getElementById('progressStatusBadge');
+      badge.innerText = status;
+      badge.style.color = statusColor;
+      badge.style.border = `1px solid ${statusColor}`;
+
+      setProgress(progressPercent);
+
+      // تنسيق التواريخ للعربية الجميلة
+      const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('nextPeriodVal').innerText = nextPeriod.toLocaleDateString('ar-EG', dateOptions);
+      
+      if (diffDays >= 0) {
+        const startStr = fertileStart.toLocaleDateString('ar-EG', { month: 'long', day: 'numeric' });
+        const endStr = fertileEnd.toLocaleDateString('ar-EG', { month: 'long', day: 'numeric' });
+        document.getElementById('fertilityWindowVal').innerText = `من ${startStr} إلى ${endStr}`;
+      } else {
+        document.getElementById('fertilityWindowVal').innerText = 'غير متوفر';
+      }
+    }
+
+    // إدارة مستخدم Firebase وحفظ البيانات
+    onAuthStateChanged(auth, async (user) => {
+      setLoader(true);
+      if (user) {
+        document.getElementById('userEmailDisplay').innerText = user.email;
+        
+        // استدعاء البيانات من Firestore
+        try {
+          const docRef = doc(db, "users_cycles", user.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('lastPeriodDate').value = data.lastPeriodDate || "";
+            document.getElementById('cycleLength').value = data.cycleLength || 28;
+            document.getElementById('periodDuration').value = data.periodDuration || 5;
+            
+            updateCycleUI(data.lastPeriodDate, parseInt(data.cycleLength) || 28, parseInt(data.periodDuration) || 5);
+          } else {
+            // استخدام قيم افتراضية جميلة إذا لم تتوفر بيانات سابقة
+            const defaultDate = new Date();
+            defaultDate.setDate(defaultDate.getDate() - 14); // منذ أسبوعين
+            const defaultDateStr = defaultDate.toISOString().split('T')[0];
+            
+            document.getElementById('lastPeriodDate').value = defaultDateStr;
+            document.getElementById('cycleLength').value = 28;
+            document.getElementById('periodDuration').value = 5;
+
+            updateCycleUI(defaultDateStr, 28, 5);
+          }
+        } catch (error) {
+          console.error("خطأ أثناء جلب البيانات من Firestore:", error);
+        }
+        
+        showScreen('dashboardScreen');
+      } else {
+        showScreen('loginScreen');
+      }
+      setLoader(false);
+    });
+
+    // 1. تسجيل الدخول
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      setLoader(true);
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        showAlert('loginAlert', translateError(error.code));
+      } finally {
+        setLoader(false);
+      }
+    });
+
+    // 2. إنشاء حساب جديد
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+
+      setLoader(true);
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        showAlert('registerAlert', translateError(error.code));
+      } finally {
+        setLoader(false);
+      }
+    });
+
+    // 3. استعادة كلمة المرور
+    document.getElementById('resetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('resetEmail').value.trim();
+
+      setLoader(true);
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showAlert('resetAlert', 'تم إرسال رابط استعادة كلمة المرور لبريدكِ الإلكتروني بنجاح.', true);
+      } catch (error) {
+        showAlert('resetAlert', translateError(error.code));
+      } finally {
+        setLoader(false);
+      }
+    });
+
+    // 4. تسجيل الخروج
+    document.getElementById('btnSignOut').addEventListener('click', async () => {
+      setLoader(true);
+      try {
+        await signOut(auth);
+      } catch (error) {
+        console.error("خطأ في تسجيل الخروج:", error);
+      } finally {
+        setLoader(false);
+      }
+    });
+
+    // 5. حفظ وتحديث بيانات الدورة الشهرية
+    document.getElementById('cycleSettingsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const lastPeriodDate = document.getElementById('lastPeriodDate').value;
+      const cycleLength = parseInt(document.getElementById('cycleLength').value);
+      const periodDuration = parseInt(document.getElementById('periodDuration').value);
+
+      if (!lastPeriodDate) {
+        showAlert('dashboardAlert', 'يرجى ملء تاريخ آخر دورة بشكل صحيح.');
+        return;
+      }
+
+      setLoader(true);
+      try {
+        // حفظ في Firestore
+        await setDoc(doc(db, "users_cycles", user.uid), {
+          lastPeriodDate,
+          cycleLength,
+          periodDuration,
+          updatedAt: new Date().toISOString()
+        });
+
+        // تحديث الواجهة
+        updateCycleUI(lastPeriodDate, cycleLength, periodDuration);
+        showAlert('dashboardAlert', 'تم حفظ وتحديث إعدادات دورتكِ بنجاح!', true);
+      } catch (error) {
+        showAlert('dashboardAlert', 'حدث خطأ أثناء حفظ البيانات، يرجى المحاولة لاحقاً.');
+        console.error("خطأ Firestore:", error);
+      } finally {
+        setLoader(false);
+        // إخفاء التنبيه تلقائياً بعد 4 ثوانٍ
+        setTimeout(() => {
+          document.getElementById('dashboardAlert').style.display = 'none';
+        }, 4000);
+      }
+    });
+  </script>
+</body>
+</html>
