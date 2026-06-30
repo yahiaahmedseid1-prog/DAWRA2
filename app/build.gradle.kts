@@ -131,12 +131,15 @@ dependencies {
 
 tasks.register<Copy>("copyApkToBuildOutputs") {
     from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
-    into(rootProject.file(".build-outputs"))
+    into(rootProject.layout.projectDirectory.dir(".build-outputs"))
 }
 
-tasks.whenTaskAdded {
-    if (name == "assembleDebug") {
-        finalizedBy("copyApkToBuildOutputs")
-    }
+tasks.register<Copy>("copyApkToVisibleDir") {
+    from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
+    into(rootProject.layout.projectDirectory.dir("build-outputs"))
+}
+
+tasks.matching { it.name == "assembleDebug" }.configureEach {
+    finalizedBy("copyApkToBuildOutputs", "copyApkToVisibleDir")
 }
 
