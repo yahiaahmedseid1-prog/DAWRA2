@@ -1,5 +1,8 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 import java.io.File
+import java.io.FileOutputStream
+import java.util.zip.ZipOutputStream
+import java.util.zip.ZipEntry
 
 plugins {
   alias(libs.plugins.android.application)
@@ -130,23 +133,47 @@ dependencies {
   "ksp"(libs.moshi.kotlin.codegen)
 }
 
+val buildDirLocal = layout.buildDirectory
+val rootProjectDirLocal = rootProject.layout.projectDirectory
+
 tasks.register("copyApkToAllVisibleLocations") {
+    val apkFile = buildDirLocal.file("outputs/apk/debug/app-debug.apk").get().asFile
+    val destDir1 = rootProjectDirLocal.dir(".build-outputs").asFile
+    val destDir2 = rootProjectDirLocal.dir("build-outputs").asFile
+    val destRootFile = rootProjectDirLocal.file("app-debug.apk").asFile
+    val zipFile = rootProjectDirLocal.file("app-debug-apk.zip").asFile
+
     doLast {
-        val apkFile = File("/app/applet/app/build/outputs/apk/debug/app-debug.apk")
         if (apkFile.exists()) {
-            // Copy to /app/.build-outputs/app-debug.apk
-            val dest1 = File("/app/.build-outputs")
-            dest1.mkdirs()
-            apkFile.copyTo(File(dest1, "app-debug.apk"), overwrite = true)
+            // Copy to /.build-outputs/app-debug.apk
+            destDir1.mkdirs()
+            apkFile.copyTo(File(destDir1, "app-debug.apk"), overwrite = true)
 
-            // Copy to /app/build-outputs/app-debug.apk
-            val dest2 = File("/app/build-outputs")
-            dest2.mkdirs()
-            apkFile.copyTo(File(dest2, "app-debug.apk"), overwrite = true)
+            // Copy to /build-outputs/app-debug.apk
+            destDir2.mkdirs()
+            apkFile.copyTo(File(destDir2, "app-debug.apk"), overwrite = true)
 
-            // Copy to /app/app-debug.apk
-            apkFile.copyTo(File("/app/app-debug.apk"), overwrite = true)
-            println("SUCCESS: Copied APK to all visible locations!")
+            // Copy to /app-debug.apk
+            apkFile.copyTo(destRootFile, overwrite = true)
+            
+            // Create a zip of the APK at the root as well in case .apk files are ignored by GitHub sync
+            try {
+                ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
+                    val entry = ZipEntry("app-debug.apk")
+                    zos.putNextEntry(entry)
+                    apkFile.inputStream().use { input ->
+                        input.copyTo(zos)
+                    }
+                    zos.closeEntry()
+                }
+                
+                val destZip2 = File(destDir2, "app-debug-apk.zip")
+                zipFile.copyTo(destZip2, overwrite = true)
+                
+                println("SUCCESS: Copied APK and created ZIP in all visible locations!")
+            } catch (e: Exception) {
+                println("WARNING: Failed to zip the APK: ${e.message}")
+            }
         } else {
             println("ERROR: Source APK not found at: ${apkFile.absolutePath}")
         }
