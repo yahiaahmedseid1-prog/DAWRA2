@@ -1,4 +1,5 @@
 import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
+import java.io.File
 
 plugins {
   alias(libs.plugins.android.application)
@@ -11,12 +12,12 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "com.aistudio.periodtracker.mcnvxz"
     minSdk = 24
-    targetSdk = 36
+    targetSdk = 35
     versionCode = 1
     versionName = "1.0"
 
@@ -129,18 +130,31 @@ dependencies {
   "ksp"(libs.moshi.kotlin.codegen)
 }
 
-tasks.register<Copy>("copyApkToBuildOutputs") {
-    from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
-    into(rootProject.layout.projectDirectory.dir(".build-outputs"))
-}
+tasks.register("copyApkToAllVisibleLocations") {
+    doLast {
+        val apkFile = File("/app/applet/app/build/outputs/apk/debug/app-debug.apk")
+        if (apkFile.exists()) {
+            // Copy to /app/.build-outputs/app-debug.apk
+            val dest1 = File("/app/.build-outputs")
+            dest1.mkdirs()
+            apkFile.copyTo(File(dest1, "app-debug.apk"), overwrite = true)
 
-tasks.register<Copy>("copyApkToVisibleDir") {
-    from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
-    into(rootProject.layout.projectDirectory.dir("build-outputs"))
+            // Copy to /app/build-outputs/app-debug.apk
+            val dest2 = File("/app/build-outputs")
+            dest2.mkdirs()
+            apkFile.copyTo(File(dest2, "app-debug.apk"), overwrite = true)
+
+            // Copy to /app/app-debug.apk
+            apkFile.copyTo(File("/app/app-debug.apk"), overwrite = true)
+            println("SUCCESS: Copied APK to all visible locations!")
+        } else {
+            println("ERROR: Source APK not found at: ${apkFile.absolutePath}")
+        }
+    }
 }
 
 tasks.matching { it.name == "assembleDebug" }.configureEach {
-    finalizedBy("copyApkToBuildOutputs", "copyApkToVisibleDir")
+    finalizedBy("copyApkToAllVisibleLocations")
 }
 
 
