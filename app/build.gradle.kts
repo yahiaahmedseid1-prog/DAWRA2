@@ -16,7 +16,7 @@ android {
 
   defaultConfig {
     applicationId = "com.aistudio.periodtracker.mcnvxz"
-    minSdk = 24
+    minSdk = 23
     targetSdk = 35
     versionCode = 1
     versionName = "1.0"
@@ -48,7 +48,7 @@ android {
       signingConfig = signingConfigs.getByName("release")
     }
     debug {
-      signingConfig = signingConfigs.getByName("debugConfig")
+      signingConfig = signingConfigs.getByName("debug")
     }
   }
   compileOptions {
